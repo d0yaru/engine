@@ -48,109 +48,14 @@ function main()
 	pawn.x = map.pawnx;
 	pawn.y = map.pawny;
 	pawn.z = map.pawnz;
+	pawn.rx = map.pawnrx;
+	pawn.ry = map.pawnry;
 	//--------------------------------------------------------------------------
 	let texture = [];
 	// xTexture 3
 	for (let i = 0; i <= map.countimg; i++) {
 		texture[i] = ltexture.loadTexture(gl, map.imgpath + '/img/img' + i + map.typeimg);
 	}
-	//--------------------------------------------------------------------------
-	// генерация карты /////////////////////////////////////////////////////////
-	//--------------------------------------------------------------------------
-// раскомментировать при режиме: img_generation
-/*
-	let pos00 = [0,37,74,111];
-	let pos01 = [75, 79, 83,112,113,114,115,116,117,118,119,120,121,122,123];
-	let pos02 = [87, 91, 95,124,125,126,127,128,129,130,131,132,133,134,135];
-	let pos03 = [99,103,107,136,137,138,139,140,141,142,143,144,145,146,147];
-
-	let pos10 = [ 1, 2, 3, 4,  5, 6, 7, 8,  9,10,11,12];
-	let pos11 = [39,43,47,   78, 82, 86];
-	let pos12 = [40,44,48,   90, 94, 98];
-	let pos13 = [41,45,49,  102,106,110];
-
-	let pos20 = [13,14,15,16, 17,18,19,20, 21,22,23,24];
-	let pos21 = [51,55,59,   77, 81, 85];
-	let pos22 = [52,56,60,   89, 93, 97];
-	let pos23 = [53,57,61,  101,105,109];
-
-	let pos30 = [25,26,27,28, 29,30,31,32, 33,34,35,36];
-	let pos31 = [63,67,71,   76, 80, 84];
-	let pos32 = [64,68,72,   88, 92, 96];
-	let pos33 = [65,69,73,  100,104,108];
-	//--------------------------------------------------------------------------
-	let downObj0 = [ 0,37,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,116,120,124,128,132,136,140,144];
-	let downObj1 = [ 1, 2, 3, 4,  13,14,15,16,  25,26,27,28,  38,39,40,41,  50,51,52,53,  62,63,64,65,  115,119,123,127,131,135,139,143,147];
-	let downObj2 = [ 5, 6, 7, 8,  17,18,19,20,  29,30,31,32,  42,43,44,45,  54,55,56,57,  66,67,68,69,  114,118,122,126,130,134,138,142,146];
-	let downObj3 = [ 9,10,11,12,  21,22,23,24,  33,34,35,36,  46,47,48,49,  58,59,60,61,  70,71,72,73,  113,117,121,125,129,133,137,141,145];
-
-	let leftObj0 = [ 0,1,5,9,13,17,21,25,29,33,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,111];
-	let leftObj1 = [2,6,10,14,18,22,26,30,34,  75,76,77,78, 87,88,89,90,  99,100,101,102, 112,113,114,115, 124,125,126,127, 136,137,138,139];
-	let leftObj2 = [3,7,11,15,19,23,27,31,35,  79,80,81,82, 91,92,93,94, 103,104,105,106, 116,117,118,119, 128,129,130,131, 140,141,142,143];
-	let leftObj3 = [4,8,12,16,20,24,28,32,36,  83,84,85,86, 95,96,97,98, 107,108,109,110, 120,121,122,123, 132,133,134,135, 144,145,146,147];
-	//--------------------------------------------------------------------------
-	for (let gx = 10; gx < 100; gx+=10) {
-		for (let gy = 1; gy < 10; gy++) {
-			//------------------------------------------------------------------
-			obj[(gx+gy)][9] = 72;
-			let chekDown = chekObjDown(obj[(gx+gy)-1][9]);
-			let chekLeft = chekObjLeft(obj[(gx+gy)-10][9]);
-
-			console.log(`Проверка >> Down:${chekDown}, Left:${chekLeft}`);
-
-			if(chekDown == 0 && chekLeft == 0) addObj(gx,gy,pos00,pos00.length);
-			if(chekDown == 0 && chekLeft == 1) addObj(gx,gy,pos01,pos01.length);
-			if(chekDown == 0 && chekLeft == 2) addObj(gx,gy,pos02,pos02.length);
-			if(chekDown == 0 && chekLeft == 3) addObj(gx,gy,pos03,pos03.length);
-
-			if(chekDown == 1 && chekLeft == 0) addObj(gx,gy,pos10,pos10.length);
-			if(chekDown == 1 && chekLeft == 1) addObj(gx,gy,pos11,pos11.length);
-			if(chekDown == 1 && chekLeft == 2) addObj(gx,gy,pos12,pos12.length);
-			if(chekDown == 1 && chekLeft == 3) addObj(gx,gy,pos13,pos13.length);
-
-			if(chekDown == 2 && chekLeft == 0) addObj(gx,gy,pos20,pos20.length);
-			if(chekDown == 2 && chekLeft == 1) addObj(gx,gy,pos21,pos21.length);
-			if(chekDown == 2 && chekLeft == 2) addObj(gx,gy,pos22,pos22.length);
-			if(chekDown == 2 && chekLeft == 3) addObj(gx,gy,pos23,pos23.length);
-
-			if(chekDown == 3 && chekLeft == 0) addObj(gx,gy,pos30,pos30.length);
-			if(chekDown == 3 && chekLeft == 1) addObj(gx,gy,pos31,pos31.length);
-			if(chekDown == 3 && chekLeft == 2) addObj(gx,gy,pos32,pos32.length);
-			if(chekDown == 3 && chekLeft == 3) addObj(gx,gy,pos33,pos33.length);
-			console.log('----------------------');
-		}
-		console.log('========================');
-	}
-	//--------------------------------------------------------------------------
-	function addObj(gx,gy,_pos,_length) {
-		let randbuf = getRandomInt(_length);
-		obj[gx+gy][9] = _pos[randbuf];
-		console.log(`Поставил = ${_pos[randbuf]}`);
-	}
-
-	function chekObjDown(id) {
-		console.log(`chekObjDown = ${id}`);
-		if(downObj0.indexOf(id) != -1) return 0;
-		else if(downObj1.indexOf(id) != -1) return 1;
-		else if(downObj2.indexOf(id) != -1) return 2;
-		else if(downObj3.indexOf(id) != -1) return 3;
-	}
-
-	function chekObjLeft(id) {
-		console.log(`chekObjLeft = ${id}`);
-		if(leftObj0.indexOf(id) != -1) return 0;
-		else if(leftObj1.indexOf(id) != -1) return 1;
-		else if(leftObj2.indexOf(id) != -1) return 2;
-		else if(leftObj3.indexOf(id) != -1) return 3;
-	}
-	//--------------------------------------------------------------------------
-	function getRandomInt(max) {
-		return Math.floor(Math.random() * max);
-	}
-	//--------------------------------------------------------------------------
-*/
-	//--------------------------------------------------------------------------
-	////////////////////////////////////////////////////////////////////////////
 	//--------------------------------------------------------------------------
 	scene.initDraw(gl, buffers)
 	//--------------------------------------------------------------------------
@@ -162,7 +67,7 @@ function main()
 		//----------------------------------------------------------------------
 		updateGame();
 		//----------------------------------------------------------------------
-		camera.setCamera(cameraMatrix, pawn.x, pawn.y, pawn.z, pawn.rx, pawn.ry);
+		camera.setCamera(cameraMatrix, -pawn.x, pawn.y, -pawn.z, pawn.rx, pawn.ry);
 		scene.updateCam(cameraMatrix);
 		//----------------------------------------------------------------------
 		scene.clearScene(gl,map.sr,map.sg,map.sb);
@@ -236,10 +141,10 @@ let addSpeed = 0;
 let Jump = 5;
 // ---------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
-	if (event.keyCode == 68) PressLeft = map.Speed+addSpeed;// W
-	if (event.keyCode == 83) PressForward = map.Speed+addSpeed;// D
-	if (event.keyCode == 65) PressRight = map.Speed+addSpeed;// S
-	if (event.keyCode == 87) PressBack = map.Speed+addSpeed;// A
+	if (event.keyCode == 65) PressLeft = map.Speed+addSpeed;// W
+	if (event.keyCode == 87) PressForward = map.Speed+addSpeed;// D
+	if (event.keyCode == 68) PressRight = map.Speed+addSpeed;// S
+	if (event.keyCode == 83) PressBack = map.Speed+addSpeed;// A
 	if (event.keyCode == 32) PressUp = Jump;// Space
 	if (event.keyCode == 16) addSpeed = 4;// Shift
 	// if (event.keyCode == 17) // Ctrl
@@ -247,10 +152,10 @@ document.addEventListener("keydown", (event) => {
 });
 // ---------------------------------------------------------------
 document.addEventListener("keyup", (event) => {
-	if (event.keyCode == 68) PressLeft = 0;
-	if (event.keyCode == 83) PressForward = 0;
-	if (event.keyCode == 65) PressRight = 0;
-	if (event.keyCode == 87) PressBack = 0;
+	if (event.keyCode == 65) PressLeft = 0;
+	if (event.keyCode == 87) PressForward = 0;
+	if (event.keyCode == 68) PressRight = 0;
+	if (event.keyCode == 83) PressBack = 0;
 	if (event.keyCode == 32) PressUp = 0;
 	if (event.keyCode == 16) addSpeed = 0;
 });

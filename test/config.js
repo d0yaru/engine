@@ -32,6 +32,9 @@ class Map
 	pawnx = 0;
 	pawny = 0;
 	pawnz = -15;
+	// Куда смотрит игрок rX, rY
+	pawnrx = 0;
+	pawnry = 180;
 	//--
 	Speed = 0.1;// Скорость игрока
 	grav = 0;// Гравитация игрока

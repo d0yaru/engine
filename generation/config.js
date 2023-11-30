@@ -32,6 +32,9 @@ class Map
 	pawnx = -5;
 	pawny = -5;
 	pawnz = -15;
+	// Куда смотрит игрок rX, rY
+	pawnrx = 0;
+	pawnry = 180;
 	//--
 	Speed = 0.1;// Скорость игрока
 	grav = 0;// Гравитация игрока
@@ -155,6 +158,100 @@ class Map
 			[9,9,0,0,0,0,1,1,1,0,0],
 		];
 	//--------------------------------------------------------------------------
-	constructor() {}
+	pos00 = [0,37,74,111];
+	pos01 = [75, 79, 83,112,113,114,115,116,117,118,119,120,121,122,123];
+	pos02 = [87, 91, 95,124,125,126,127,128,129,130,131,132,133,134,135];
+	pos03 = [99,103,107,136,137,138,139,140,141,142,143,144,145,146,147];
+
+	pos10 = [ 1, 2, 3, 4,  5, 6, 7, 8,  9,10,11,12];
+	pos11 = [39,43,47,   78, 82, 86];
+	pos12 = [40,44,48,   90, 94, 98];
+	pos13 = [41,45,49,  102,106,110];
+
+	pos20 = [13,14,15,16, 17,18,19,20, 21,22,23,24];
+	pos21 = [51,55,59,   77, 81, 85];
+	pos22 = [52,56,60,   89, 93, 97];
+	pos23 = [53,57,61,  101,105,109];
+
+	pos30 = [25,26,27,28, 29,30,31,32, 33,34,35,36];
+	pos31 = [63,67,71,   76, 80, 84];
+	pos32 = [64,68,72,   88, 92, 96];
+	pos33 = [65,69,73,  100,104,108];
+	//--------------------------------------------------------------------------
+	downObj0 = [ 0,37,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,116,120,124,128,132,136,140,144];
+	downObj1 = [ 1, 2, 3, 4,  13,14,15,16,  25,26,27,28,  38,39,40,41,  50,51,52,53,  62,63,64,65,  115,119,123,127,131,135,139,143,147];
+	downObj2 = [ 5, 6, 7, 8,  17,18,19,20,  29,30,31,32,  42,43,44,45,  54,55,56,57,  66,67,68,69,  114,118,122,126,130,134,138,142,146];
+	downObj3 = [ 9,10,11,12,  21,22,23,24,  33,34,35,36,  46,47,48,49,  58,59,60,61,  70,71,72,73,  113,117,121,125,129,133,137,141,145];
+
+	leftObj0 = [ 0,1,5,9,13,17,21,25,29,33,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,111];
+	leftObj1 = [2,6,10,14,18,22,26,30,34,  75,76,77,78, 87,88,89,90,  99,100,101,102, 112,113,114,115, 124,125,126,127, 136,137,138,139];
+	leftObj2 = [3,7,11,15,19,23,27,31,35,  79,80,81,82, 91,92,93,94, 103,104,105,106, 116,117,118,119, 128,129,130,131, 140,141,142,143];
+	leftObj3 = [4,8,12,16,20,24,28,32,36,  83,84,85,86, 95,96,97,98, 107,108,109,110, 120,121,122,123, 132,133,134,135, 144,145,146,147];
+	//--------------------------------------------------------------------------
+	//--------------------------------------------------------------------------
+	constructor()
+	{
+		//--------------------------------------------------------------------------
+		for (let gx = 10; gx < 100; gx+=10) {
+			for (let gy = 1; gy < 10; gy++) {
+				//------------------------------------------------------------------
+				this.setmap[(gx+gy)][9] = 72;
+				let chekDown = this.chekObjDown(this.setmap[(gx+gy)-1][9]);
+				let chekLeft = this.chekObjLeft(this.setmap[(gx+gy)-10][9]);
+
+				// console.log(`proverka >> Down:${chekDown}, Left:${chekLeft}`);
+
+				if(chekDown == 0 && chekLeft == 0) this.addObj(gx,gy,this.pos00,this.pos00.length);
+				if(chekDown == 0 && chekLeft == 1) this.addObj(gx,gy,this.pos01,this.pos01.length);
+				if(chekDown == 0 && chekLeft == 2) this.addObj(gx,gy,this.pos02,this.pos02.length);
+				if(chekDown == 0 && chekLeft == 3) this.addObj(gx,gy,this.pos03,this.pos03.length);
+
+				if(chekDown == 1 && chekLeft == 0) this.addObj(gx,gy,this.pos10,this.pos10.length);
+				if(chekDown == 1 && chekLeft == 1) this.addObj(gx,gy,this.pos11,this.pos11.length);
+				if(chekDown == 1 && chekLeft == 2) this.addObj(gx,gy,this.pos12,this.pos12.length);
+				if(chekDown == 1 && chekLeft == 3) this.addObj(gx,gy,this.pos13,this.pos13.length);
+
+				if(chekDown == 2 && chekLeft == 0) this.addObj(gx,gy,this.pos20,this.pos20.length);
+				if(chekDown == 2 && chekLeft == 1) this.addObj(gx,gy,this.pos21,this.pos21.length);
+				if(chekDown == 2 && chekLeft == 2) this.addObj(gx,gy,this.pos22,this.pos22.length);
+				if(chekDown == 2 && chekLeft == 3) this.addObj(gx,gy,this.pos23,this.pos23.length);
+
+				if(chekDown == 3 && chekLeft == 0) this.addObj(gx,gy,this.pos30,this.pos30.length);
+				if(chekDown == 3 && chekLeft == 1) this.addObj(gx,gy,this.pos31,this.pos31.length);
+				if(chekDown == 3 && chekLeft == 2) this.addObj(gx,gy,this.pos32,this.pos32.length);
+				if(chekDown == 3 && chekLeft == 3) this.addObj(gx,gy,this.pos33,this.pos33.length);
+				// console.log('----------------------');
+			}
+			// console.log('========================');
+		}
+		//--------------------------------------------------------------------------
+	}
+	//--------------------------------------------------------------------------
+	addObj(gx,gy,_pos,_length) {
+		let randbuf = this.getRandomInt(_length);
+		this.setmap[gx+gy][9] = _pos[randbuf];
+		// console.log(`Postawil = ${_pos[randbuf]}`);
+	}
+
+	chekObjDown(id) {
+		// console.log(`chekObjDown = ${id}`);
+		if(this.downObj0.indexOf(id) != -1) return 0;
+		else if(this.downObj1.indexOf(id) != -1) return 1;
+		else if(this.downObj2.indexOf(id) != -1) return 2;
+		else if(this.downObj3.indexOf(id) != -1) return 3;
+	}
+
+	chekObjLeft(id) {
+		// console.log(`chekObjLeft = ${id}`);
+		if(this.leftObj0.indexOf(id) != -1) return 0;
+		else if(this.leftObj1.indexOf(id) != -1) return 1;
+		else if(this.leftObj2.indexOf(id) != -1) return 2;
+		else if(this.leftObj3.indexOf(id) != -1) return 3;
+	}
+	//--------------------------------------------------------------------------
+	getRandomInt(max) {
+		return Math.floor(Math.random() * max);
+	}
+	//--------------------------------------------------------------------------
 }
 //------------------------------------------------------------------------------
