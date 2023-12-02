@@ -61,11 +61,11 @@ class Draw
 		//----------------------------------------------------------------------
 		// установка объекта по координатам
 		const modelViewMatrix = glMatrix.mat4.create();
-		glMatrix.mat4.translate(modelViewMatrix,modelViewMatrix,[obj[id][0], obj[id][1], obj[id][2]]);
+		glMatrix.mat4.translate(modelViewMatrix,modelViewMatrix,[-obj[id][0], -obj[id][1], -obj[id][2]]);
 
-		glMatrix.mat4.rotate(modelViewMatrix,modelViewMatrix,-obj[id][3]*Math.PI/180,[1, 0, 0]);
+		glMatrix.mat4.rotate(modelViewMatrix,modelViewMatrix,obj[id][3]*Math.PI/180,[1, 0, 0]);
 		glMatrix.mat4.rotate(modelViewMatrix,modelViewMatrix,obj[id][4]*Math.PI/180,[0, 1, 0]);
-		glMatrix.mat4.rotate(modelViewMatrix,modelViewMatrix,-obj[id][5]*Math.PI/180,[0, 0, 1]);
+		glMatrix.mat4.rotate(modelViewMatrix,modelViewMatrix,obj[id][5]*Math.PI/180,[0, 0, 1]);
 
 		glMatrix.mat4.scale(modelViewMatrix, modelViewMatrix, [obj[id][6],obj[id][7],obj[id][8]]);
 		//----------------------------------------------------------------------

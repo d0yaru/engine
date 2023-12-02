@@ -38,7 +38,7 @@ class Collision2d
 					dz = point2[2] - z0;
 					if (Math.abs(normal[1]) > 0.8)
 					{
-						if (point3[1] > point2[1]) onGround = true;
+						if (point3[1] < point2[1]) onGround = true;
 					}
 					else dy = y1 - y0;
 				}

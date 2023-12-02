@@ -67,7 +67,7 @@ function main()
 		//----------------------------------------------------------------------
 		updateGame();
 		//----------------------------------------------------------------------
-		camera.setCamera(cameraMatrix, -pawn.x, pawn.y, -pawn.z, pawn.rx, pawn.ry);
+		camera.setCamera(cameraMatrix, pawn.x, pawn.y, pawn.z, pawn.rx, pawn.ry);
 		scene.updateCam(cameraMatrix);
 		//----------------------------------------------------------------------
 		scene.clearScene(gl,map.sr,map.sg,map.sb);
@@ -141,10 +141,10 @@ let addSpeed = 0;
 let Jump = 5;
 // ---------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
-	if (event.keyCode == 65) PressLeft = map.Speed+addSpeed;// W
-	if (event.keyCode == 87) PressForward = map.Speed+addSpeed;// D
-	if (event.keyCode == 68) PressRight = map.Speed+addSpeed;// S
-	if (event.keyCode == 83) PressBack = map.Speed+addSpeed;// A
+	if (event.keyCode == 65) PressLeft = map.Speed+addSpeed;// A 65
+	if (event.keyCode == 87) PressForward = map.Speed+addSpeed;// W 87
+	if (event.keyCode == 68) PressRight = map.Speed+addSpeed;// D 68
+	if (event.keyCode == 83) PressBack = map.Speed+addSpeed;// S 83
 	if (event.keyCode == 32) PressUp = Jump;// Space
 	if (event.keyCode == 16) addSpeed = 4;// Shift
 	// if (event.keyCode == 17) // Ctrl
@@ -175,15 +175,19 @@ function updateGame()
 {
 	//------------------------------------------------------------
 	// Задаем локальные переменные смещения
-	dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressForward - PressBack)*Math.sin(pawn.ry*deg))*pawn.vx;
-	dz = ( -(PressForward - PressBack)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
-	dy = dy + map.grav;
+	// dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressForward - PressBack)*Math.sin(pawn.ry*deg))*pawn.vx;
+	// dz = (-(PressForward - PressBack)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
+
+	dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressBack - PressForward)*Math.sin(pawn.ry*deg))*pawn.vx;
+	dz = (-(PressBack - PressForward)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
+
+	dy = dy - map.grav;
 	if (onGround)
 	{
 		dy = 0;
 		if (PressUp)
 		{
-			dy = - PressUp*pawn.vy;
+			dy += PressUp*pawn.vy;
 			onGround = false;
 		}
 	};
@@ -202,8 +206,13 @@ function updateGame()
 	
 	if (lock)// Если курсор захвачен, разрешаем вращение
 	{
-		pawn.rx = pawn.rx + drx;
-		pawn.ry = pawn.ry + dry;
+		pawn.rx = pawn.rx - drx;
+		pawn.ry = pawn.ry - dry;
+		if (pawn.rx > 80) pawn.rx = 80;
+		if (pawn.rx < -80) pawn.rx = -80;
+
+		if (pawn.ry > 359.9) pawn.ry = 0;
+		if (pawn.ry < 0) pawn.ry = 359.9;
 	};
 	//--------------------------------------------------------------------------
 	// интерфейс
@@ -215,11 +224,11 @@ function updateGame()
 	" pawnRY: " + pawn.ry.toFixed(1);
 	//--------------------------------------------------------------------------
 	// Если упал в пропость - спавн
-	if(pawn.y > 3000)
+	if(pawn.y < -3000)
 	{
 		pawn.x = 0;
-		pawn.y = -100;
-		pawn.z = 0;
+		pawn.y = 100;
+		pawn.z = -150;
 	}
 }
 //------------------------------------------------------------------------------
@@ -233,8 +242,8 @@ document.addEventListener("keydown", (event) => {
 	//-----------------------------------------------------------------
 	if (event.keyCode == 39) obj[objId][0+objMode*3] += 1.1;// ->
 	if (event.keyCode == 37) obj[objId][0+objMode*3] -= 1.1;// <-
-	if (event.keyCode == 38) obj[objId][2+objMode*3] -= 1.1;// ^
-	if (event.keyCode == 40) obj[objId][2+objMode*3] += 1.1;// v
+	if (event.keyCode == 38) obj[objId][2+objMode*3] += 1.1;// ^
+	if (event.keyCode == 40) obj[objId][2+objMode*3] -= 1.1;// v
 	if (event.keyCode == 34) obj[objId][1+objMode*3] -= 1.1;// pageDown
 	if (event.keyCode == 33) obj[objId][1+objMode*3] += 1.1;// PageUp
 	//-----------------------------------------------------------------

@@ -21,8 +21,8 @@ class Camera
 			gl.canvas.clientWidth/gl.canvas.clientHeight,
 			0.1, 10000.0);
 
-		glMatrix.mat4.rotate(projectionMatrix,projectionMatrix,_rx*Math.PI/180,[1, 0, 0]);
-		glMatrix.mat4.rotate(projectionMatrix,projectionMatrix,-_ry*Math.PI/180,[0, 1, 0]);
+		glMatrix.mat4.rotate(projectionMatrix,projectionMatrix,(-_rx+180)*Math.PI/180,[1, 0, 0]);
+		glMatrix.mat4.rotate(projectionMatrix,projectionMatrix,(-_ry+180)*Math.PI/180,[0, 1, 0]);
 
 		glMatrix.mat4.translate(projectionMatrix,projectionMatrix,[_x,_y,_z]);
 		//----------------------------------------------------------------------
