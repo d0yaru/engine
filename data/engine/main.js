@@ -19,7 +19,8 @@ let obj = map.test;
 //------------------------------------------------------------------------------
 let shader = new Shader();
 //------------------------------------------------------------------------------
-let pawn = new Player(0, 0, 0, 0, 0);
+let pawn = new Player(0, 0, 0, 0, 0);// Игрок
+let enemy = new Player(-200, 50, 500, 0, 0);// Враг
 //------------------------------------------------------------------------------
 let camera = new Camera();
 let cameraMatrix = camera.getCamera();
@@ -44,12 +45,7 @@ function main()
 	const buffers = objs.initBuffers(gl);// Загружаем буферы
 	shader = shader.initShader();
 	//--------------------------------------------------------------------------
-	obj = map.setmap;
-	pawn.x = map.pawnx;
-	pawn.y = map.pawny;
-	pawn.z = map.pawnz;
-	pawn.rx = map.pawnrx;
-	pawn.ry = map.pawnry;
+	loadMap(map.level);
 	//--------------------------------------------------------------------------
 	let texture = [];
 	// xTexture 3
@@ -57,7 +53,7 @@ function main()
 		texture[i] = ltexture.loadTexture(gl, map.imgpath + '/img/img' + i + map.typeimg);
 	}
 	//--------------------------------------------------------------------------
-	scene.initDraw(gl, buffers)
+	// scene.initDraw(gl, buffers)
 	//--------------------------------------------------------------------------
 	function render()
 	{
@@ -68,10 +64,11 @@ function main()
 		updateGame();
 		//----------------------------------------------------------------------
 		camera.setCamera(cameraMatrix, pawn.x, pawn.y, pawn.z, pawn.rx, pawn.ry);
-		scene.updateCam(cameraMatrix);
+		// scene.updateCam(cameraMatrix);
 		//----------------------------------------------------------------------
 		scene.clearScene(gl,map.sr,map.sg,map.sb);
-		addScene(gl, texture);
+		addScene(gl, texture, buffers);
+		if (gColor) objId = scene.getColor();
 		//----------------------------------------------------------------------
 		document.getElementById("objData").innerHTML = 
 		" objId: " + objId +
@@ -89,11 +86,16 @@ setTimeout(() => {  main(); }, 500);
 //------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
-function addScene(gl, texture)
+function addScene(gl, texture, buffers)
 {
 	for (let id = 0; id < obj.length; id++) {// рисует все объекты на карте
-		scene.drawScene(gl, texture, obj, id);
-		objCount++;
+		if (obj[id][12])
+		{
+			if (obj[id][11]) obj[id][4] = pawn.ry;
+			if (!gColor) scene.drawScene(gl, texture, obj, id, buffers);
+			else scene.drawScene2(gl, texture, obj, id, buffers);
+			objCount++;
+		}
 	}
 	objCount = 0;
 }
@@ -124,6 +126,14 @@ document.addEventListener("mousemove", (event)=> {
 	MouseX = event.movementX;
 	MouseY = event.movementY;
 });
+
+document.addEventListener("mousedown", (event)=> {
+	if (event.which == 1) gColor = 1;
+});
+//----------------------------------------------------------------
+document.addEventListener("mouseup", (event)=> {
+	if (event.which == 1) gColor = 0;
+});
 //----------------------------------------------------------------
 //////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------
@@ -137,17 +147,28 @@ let PressLeft = 0;
 let PressRight = 0;
 let PressUp = 0;
 
+let gColor = 0;
+
 let addSpeed = 0;
-let Jump = 5;
+let creative = false;
+let ghost = false;
 // ---------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
-	if (event.keyCode == 65) PressLeft = map.Speed+addSpeed;// A 65
-	if (event.keyCode == 87) PressForward = map.Speed+addSpeed;// W 87
-	if (event.keyCode == 68) PressRight = map.Speed+addSpeed;// D 68
-	if (event.keyCode == 83) PressBack = map.Speed+addSpeed;// S 83
-	if (event.keyCode == 32) PressUp = Jump;// Space
-	if (event.keyCode == 16) addSpeed = 4;// Shift
-	// if (event.keyCode == 17) // Ctrl
+	if (event.keyCode == 65) PressLeft = map.speed + addSpeed;// A 65
+	if (event.keyCode == 87) PressForward = map.speed + addSpeed;// W 87
+	if (event.keyCode == 68) PressRight = map.speed + addSpeed;// D 68
+	if (event.keyCode == 83) PressBack = map.speed + addSpeed;// S 83
+	if (event.keyCode == 32) PressUp = map.jump + addSpeed;// Space
+
+	if (event.keyCode == 16)// Shift
+	{
+		if (!creative) addSpeed = map.boost;
+		else PressUp = -map.jump;
+	}
+
+	// if (event.keyCode == 17) gColor = 1;// Ctrl
+	if (event.keyCode == 67) creative = !creative;// [C]
+	if (event.keyCode == 71) ghost = !ghost;// [G]
 	// console.log(event.keyCode);
 });
 // ---------------------------------------------------------------
@@ -158,6 +179,7 @@ document.addEventListener("keyup", (event) => {
 	if (event.keyCode == 83) PressBack = 0;
 	if (event.keyCode == 32) PressUp = 0;
 	if (event.keyCode == 16) addSpeed = 0;
+	// if (event.keyCode == 17) gColor = 0;
 });
 // ---------------------------------------------------------------
 //////////////////////////////////////////////////////////////////
@@ -170,35 +192,61 @@ const deg = 3.141592/180;
 let onGround = false;
 
 let dx = dy = dz = 0;
+let edx = edy = edz = 0;// враг
 // ---------------------------------------------------------------
 function updateGame()
 {
-	//------------------------------------------------------------
+	//--------------------------------------------------------------------------
 	// Задаем локальные переменные смещения
-	// dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressForward - PressBack)*Math.sin(pawn.ry*deg))*pawn.vx;
-	// dz = (-(PressForward - PressBack)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
-
 	dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressBack - PressForward)*Math.sin(pawn.ry*deg))*pawn.vx;
 	dz = (-(PressBack - PressForward)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
+	//--------------------------------------------------------------------------
+	// enemy.rx = obj[0][3];
+	enemy.ry = obj[0][4]+180;
 
-	dy = dy - map.grav;
-	if (onGround)
+	edx = ((0 - 0)*Math.cos(enemy.ry*deg) - (0 - 1)*Math.sin(enemy.ry*deg))*enemy.vx;
+	edz = (-(0 - 1)*Math.cos(enemy.ry*deg) - (0 - 0)*Math.sin(enemy.ry*deg))*enemy.vz;
+	
+	enemy.x = enemy.x + edx;
+	// enemy.y = enemy.y + edy;
+	enemy.z = enemy.z + edz;
+
+	document.getElementById("debug").innerHTML = " X:["+enemy.x.toFixed(2)+"] z:["+enemy.z.toFixed(2)+"]";
+	// чтобы не убегал далеко
+	if (enemy.x < -1500) enemy.x = -1500;
+	if (enemy.x > 1500) enemy.x = 1500;
+	if (enemy.z < -1500) enemy.z = -1500;
+	if (enemy.z > 1500) enemy.z = 1500;
+
+	obj[0][0] = enemy.x;
+	obj[0][2] = enemy.z;
+	//--------------------------------------------------------------------------
+	if (!creative)
 	{
-		dy = 0;
-		if (PressUp)
+		dy = dy - map.grav;
+		if (onGround)
 		{
-			dy += PressUp*pawn.vy;
-			onGround = false;
+			dy = 0;
+			if (PressUp)
+			{
+				dy += PressUp*pawn.vy;
+				onGround = false;
+			}
 		}
-	};
+	}
+	else
+	{
+		pawn.y += PressUp;
+		dy = 0;
+	}
 	//------------------------------------------------------------
-	if(map.collis) coll.collision2d();// Проверяем коллизию с прямоугольниками
-	//------------------------------------------------------------
+	if(!ghost) coll.collision2d();// Проверяем коллизию с прямоугольниками
+	//--------------------------------------------------------------------------
 	// Прибавляем смещения к координатам
 	pawn.x = pawn.x + dx;
 	pawn.y = pawn.y + dy;
 	pawn.z = pawn.z + dz;
-	//------------------------------------------------------------
+	//--------------------------------------------------------------------------
 	drx = MouseY/6;
 	dry = -MouseX/6;
 	
@@ -226,15 +274,26 @@ function updateGame()
 	// Если упал в пропость - спавн
 	if(pawn.y < -3000)
 	{
-		pawn.x = 0;
-		pawn.y = 100;
-		pawn.z = -150;
+		playerSpawn();
 	}
 }
 //------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
+function playerSpawn()
+{
+	pawn.x = map.spawnx;
+	pawn.y = map.spawny;
+	pawn.z = map.spawnz;
+	pawn.rx = map.spawnrx;
+	pawn.ry = map.spawnrx;
+}
 
+function loadMap(world)
+{
+	obj = map.setmap[world];
+	playerSpawn();
+}
 //---------------------------------------------------------------------
 //   К Л А В И А Т У Р А   ////////////////////////////////////////////
 //---------------------------------------------------------------------
