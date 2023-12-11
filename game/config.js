@@ -57,6 +57,8 @@ class Map// true false
 	xTexture = true;
 	xLighting = true;
 	//--------------------------------------------------------------------------
+	objId = 0;// id выбранного обьекта
+	//--------------------------------------------------------------------------
 	// Цвет неба
 	sr = 0.3;
 	sg = 0.55;
@@ -212,11 +214,13 @@ class Map// true false
 	//--------------------------------------------------------------------------
 	setHealth(count)
 	{
+		// wounded.play();
 		map.health += count;
 		// console.log(` >> My Health: [ ${map.health} ]`);
 		document.getElementById("health").innerHTML = " Health: " + map.health;
 		if (map.health < 0)
 		{
+			// deathSound.play();
 			alert(" >>   G A M E   O V E R !   ( Нажмите [F5] )   <<< ");
 			// console.log(` >>   G A M E   O V E R !`);
 			// setTimeout(() => {  loadMap(0); }, 500);
@@ -225,6 +229,7 @@ class Map// true false
 	//--------------------------------------------------------------------------
 	setCrystal(count)
 	{
+		// bring.play();
 		map.crystal += count;
 		// console.log(` >> My Health: [ ${map.health} ]`);
 		document.getElementById("crystal").innerHTML = " Crystal: " + map.crystal;

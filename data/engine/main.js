@@ -1,7 +1,9 @@
 //------------------------------------------------------------------------------
 // Для начала получим контекст WebGL ///////////////////////////////////////////
 //------------------------------------------------------------------------------
-const gl = document.getElementById('glcanvas').getContext('webgl');
+const canvas = document.getElementById("canvas");
+// console.log( canvas.width, canvas.height );
+const gl = canvas.getContext('webgl');
 if(!gl) alert("Ваш браузер не поддерживает WebGL");
 //------------------------------------------------------------------------------
 //   T E S T   /////////////////////////////////////////////////////////////////
@@ -31,13 +33,68 @@ let coll = new Collision2d();
 //------------------------------------------------------------------------------
 //   П Е Р Е М Е Н Н Ы Е   /////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
-let objId = 0;// id выбранного обьекта
 let objCount = 0;// количество загруженых объектов
 let objMode = 0;// режим редактирования 0-позиция, 1-вращение, 2-размеры
 let objModeText = "";
 //------------------------------------------------------------------------------
+let shotOpen = false;
+let shotLook = false;
+//------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
+// ---------------------------------------------------------------
+// Загрузка звуков
+// steps_snowSound.play();
+// let shotSound = new Audio;
+// shotSound.src = "game/sounds/shot.mp3";// выстрел
+
+let shot2_left_Sound = new Audio;
+shot2_left_Sound.src = "game/sounds/shot2.mp3";// выстрел
+let shot2_right_Sound = new Audio;
+shot2_right_Sound.src = "game/sounds/shot2.mp3";// выстрел
+
+let deathSound = new Audio;
+deathSound.src = "game/sounds/death.mp3";// гибель
+// let death1Sound = new Audio;
+// death1Sound.src = "game/sounds/death1.mp3";// гибель 1
+let death2Sound = new Audio;
+death2Sound.src = "game/sounds/death2.mp3";// гибель 2
+// let death3Sound = new Audio;
+// death3Sound.src = "game/sounds/death3.mp3";// гибель 3
+
+// let hitSound = new Audio;
+// hitSound.src = "game/sounds/hit.mp3";// попал по врагу
+
+let respawnSound = new Audio;
+respawnSound.src = "game/sounds/respawn.mp3";// спавн игрока
+
+let bringSound = new Audio;
+bringSound.src = "game/sounds/bring.mp3";// собрал
+
+let woundedSound = new Audio;
+woundedSound.src = "game/sounds/wounded.mp3";// ранил
+
+let nokeySound = new Audio;
+nokeySound.src = "game/sounds/nokey.mp3";// нет ключа
+
+let stepsSound = new Audio;
+stepsSound.src = "game/sounds/steps.mp3";// шаги по деревянному полу
+
+let steps_snowSound = new Audio;
+steps_snowSound.src = "game/sounds/steps_snow.mp3";// шаги по деревянному снегу
+
+// let steps_wadeSound = new Audio;
+// steps_wadeSound.src = "game/sounds/steps_wade.mp3";// шаги по деревянному воде
+
+let picked_kitSound = new Audio;
+picked_kitSound.src = "game/sounds/picked_kit.mp3";// подобрал аптечку
+
+let picked_keySound = new Audio;
+picked_keySound.src = "game/sounds/picked_key.mp3";// подобрал ключ
+
+let golevelSound = new Audio;
+golevelSound.src = "game/sounds/golevel.mp3";// переход на следующий уровень
+// ---------------------------------------------------------------
 function main()
 {
 	//--------------------------------------------------------------------------
@@ -68,13 +125,12 @@ function main()
 		//----------------------------------------------------------------------
 		scene.clearScene(gl,map.sr,map.sg,map.sb);
 		addScene(gl, texture, buffers);
-		if (gColor) objId = scene.getColor();
 		//----------------------------------------------------------------------
 		document.getElementById("objData").innerHTML = 
-		" objId: " + objId +
-		" X:"+obj[objId][0].toFixed(2)+" Y:"+obj[objId][1].toFixed(2)+" Z:"+obj[objId][2].toFixed(2)+
-		" rX:"+obj[objId][3].toFixed(2)+" rY:"+obj[objId][4].toFixed(2)+" rZ:"+obj[objId][5].toFixed(2)+
-		" sX:"+obj[objId][6].toFixed(2)+" sY:"+obj[objId][7].toFixed(2)+" sZ:"+obj[objId][8].toFixed(2)+
+		" objId: " + map.objId +
+		" X:"+obj[map.objId][0].toFixed(2)+" Y:"+obj[map.objId][1].toFixed(2)+" Z:"+obj[map.objId][2].toFixed(2)+
+		" rX:"+obj[map.objId][3].toFixed(2)+" rY:"+obj[map.objId][4].toFixed(2)+" rZ:"+obj[map.objId][5].toFixed(2)+
+		" sX:"+obj[map.objId][6].toFixed(2)+" sY:"+obj[map.objId][7].toFixed(2)+" sZ:"+obj[map.objId][8].toFixed(2)+
 		" objCount: " + objCount + " objMode: " + objMode + objModeText;
 		//----------------------------------------------------------------------
 	}
@@ -92,8 +148,12 @@ function addScene(gl, texture, buffers)
 		if (obj[id][12])
 		{
 			if (obj[id][11]) obj[id][4] = pawn.ry;
-			if (!gColor) scene.drawScene(gl, texture, obj, id, buffers);
-			else scene.drawScene2(gl, texture, obj, id, buffers);
+
+			if (gColor && !shotLook) scene.drawScene2(gl, texture, obj, id, buffers);
+			else scene.drawScene(gl, texture, obj, id, buffers);
+
+			// scene.drawScene(gl, texture, obj, id, buffers);
+
 			objCount++;
 		}
 	}
@@ -122,22 +182,92 @@ container.onclick = function() {
 let MouseX = 0;
 let MouseY = 0;
 //----------------------------------------------------------------
+// let mouseLeftLock = false;
+
+// function mLeftLock()
+// {
+// 	mouseLeftLock = false;
+// }
+
 document.addEventListener("mousemove", (event)=> {
 	MouseX = event.movementX;
 	MouseY = event.movementY;
 });
 
 document.addEventListener("mousedown", (event)=> {
-	if (event.which == 1) gColor = 1;
+	// if (event.which == 1 && !mouseLeftLock)
+	if (event.which == 1)
+	{
+		if (shotRL) {shot2_left_Sound.play(); shot2_left(); shotRL =! shotRL;}
+		else {shot2_right_Sound.play(); shot2_right(); shotRL =! shotRL;}
+		gColor = 1;
+		// shot2Sound.play();
+		mouseLeftLock = true;
+		// setTimeout(() => {  mLeftLock(); }, 600);
+	}
 });
 //----------------------------------------------------------------
 document.addEventListener("mouseup", (event)=> {
-	if (event.which == 1) gColor = 0;
+	if (event.which == 1) {gColor = 0;shotLook = false;}
 });
 //----------------------------------------------------------------
 //////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------
+let shotRL = false;
+const two_pistols_left = document.getElementById("two_pistols_left");
+const two_pistols_right = document.getElementById("two_pistols_right");
 
+function shot2_left()
+{
+	shot3_2_left();
+	if(two_pistols_left.classList != "shot2_left")
+	{
+		two_pistols_left.classList.add("shot2_left");
+	}
+	setTimeout(function()
+	{
+		two_pistols_left.classList.remove("shot2_left");
+	}, 500);
+}
+
+function shot2_right()
+{
+	shot3_2_left();
+	if(two_pistols_right.classList != "shot2_right")
+	{
+		two_pistols_right.classList.add("shot2_right");
+	}
+	setTimeout(function()
+	{
+		two_pistols_right.classList.remove("shot2_right");
+	}, 500);
+}
+
+function shot3_left()
+{
+	if(two_pistols_left.classList != "shot3_left")
+	{
+		two_pistols_left.classList.add("shot3_left");
+	}
+
+	if(two_pistols_right.classList != "shot3_right")
+	{
+		two_pistols_right.classList.add("shot3_right");
+	}
+}
+
+function shot3_2_left()
+{
+	if(two_pistols_left.classList == "shot3_left")
+	{
+		two_pistols_left.classList.remove("shot3_left");
+	}
+
+	if(two_pistols_right.classList == "shot3_right")
+	{
+		two_pistols_right.classList.remove("shot3_right");
+	}
+}
 // ---------------------------------------------------------------
 //   К Л А В И А Т У Р А   ///////////////////////////////////////
 // ---------------------------------------------------------------
@@ -154,11 +284,11 @@ let creative = false;
 let ghost = false;
 // ---------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
-	if (event.keyCode == 65) PressLeft = map.speed + addSpeed;// A 65
-	if (event.keyCode == 87) PressForward = map.speed + addSpeed;// W 87
-	if (event.keyCode == 68) PressRight = map.speed + addSpeed;// D 68
-	if (event.keyCode == 83) PressBack = map.speed + addSpeed;// S 83
-	if (event.keyCode == 32) PressUp = map.jump + addSpeed;// Space
+	if (event.keyCode == 65) {stepsSound.play(); PressLeft = map.speed + addSpeed;}// A 65
+	if (event.keyCode == 87) {stepsSound.play(); PressForward = map.speed + addSpeed;}// W 87
+	if (event.keyCode == 68) {stepsSound.play(); PressRight = map.speed + addSpeed;}// D 68
+	if (event.keyCode == 83) {stepsSound.play(); PressBack = map.speed + addSpeed;}// S 83
+	if (event.keyCode == 32) {steps_snowSound.play(); PressUp = map.jump + addSpeed;}// Space
 
 	if (event.keyCode == 16)// Shift
 	{
@@ -170,6 +300,7 @@ document.addEventListener("keydown", (event) => {
 	if (event.keyCode == 67) creative = !creative;// [C]
 	if (event.keyCode == 71) ghost = !ghost;// [G]
 	// console.log(event.keyCode);
+	shot3_left();
 });
 // ---------------------------------------------------------------
 document.addEventListener("keyup", (event) => {
@@ -180,6 +311,8 @@ document.addEventListener("keyup", (event) => {
 	if (event.keyCode == 32) PressUp = 0;
 	if (event.keyCode == 16) addSpeed = 0;
 	// if (event.keyCode == 17) gColor = 0;
+
+	// shot3_2_left();
 });
 // ---------------------------------------------------------------
 //////////////////////////////////////////////////////////////////
@@ -282,6 +415,7 @@ function updateGame()
 //------------------------------------------------------------------------------
 function playerSpawn()
 {
+	// respawnSound.play();
 	pawn.x = map.spawnx;
 	pawn.y = map.spawny;
 	pawn.z = map.spawnz;
@@ -299,23 +433,23 @@ function loadMap(world)
 //---------------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
 	//-----------------------------------------------------------------
-	if (event.keyCode == 39) obj[objId][0+objMode*3] += 1.1;// ->
-	if (event.keyCode == 37) obj[objId][0+objMode*3] -= 1.1;// <-
-	if (event.keyCode == 38) obj[objId][2+objMode*3] += 1.1;// ^
-	if (event.keyCode == 40) obj[objId][2+objMode*3] -= 1.1;// v
-	if (event.keyCode == 34) obj[objId][1+objMode*3] -= 1.1;// pageDown
-	if (event.keyCode == 33) obj[objId][1+objMode*3] += 1.1;// PageUp
+	if (event.keyCode == 39) obj[map.objId][0+objMode*3] += 2.1;// ->
+	if (event.keyCode == 37) obj[map.objId][0+objMode*3] -= 2.1;// <-
+	if (event.keyCode == 38) obj[map.objId][2+objMode*3] += 2.1;// ^
+	if (event.keyCode == 40) obj[map.objId][2+objMode*3] -= 2.1;// v
+	if (event.keyCode == 34) obj[map.objId][1+objMode*3] -= 2.1;// pageDown
+	if (event.keyCode == 33) obj[map.objId][1+objMode*3] += 2.1;// PageUp
 	//-----------------------------------------------------------------
-	if (event.keyCode == 48) objId = 0;// 0
-	if (event.keyCode == 49) objId = 1;// 1
-	if (event.keyCode == 50) objId = 2;// 2
-	if (event.keyCode == 51) objId = 3;// 3
-	if (event.keyCode == 52) objId = 4;// 4
-	if (event.keyCode == 53) objId = 5;// 5
-	if (event.keyCode == 54) objId = 6;// 6
-	if (event.keyCode == 55) objId = 7;// 7
-	if (event.keyCode == 56) objId = 8;// 8
-	if (event.keyCode == 57) objId = 9;// 9
+	// if (event.keyCode == 48) objId = 0;// 0
+	// if (event.keyCode == 49) objId = 1;// 1
+	// if (event.keyCode == 50) objId = 2;// 2
+	// if (event.keyCode == 51) objId = 3;// 3
+	// if (event.keyCode == 52) objId = 4;// 4
+	// if (event.keyCode == 53) objId = 5;// 5
+	// if (event.keyCode == 54) objId = 6;// 6
+	// if (event.keyCode == 55) objId = 7;// 7
+	// if (event.keyCode == 56) objId = 8;// 8
+	// if (event.keyCode == 57) objId = 9;// 9
 	//----------------------------------------------------------------- 
 	if (event.keyCode == 107)// num +
 	{

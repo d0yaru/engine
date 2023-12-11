@@ -13,18 +13,29 @@ class Draw
 	{
 		const pixels = new Uint8Array(4);
 		gl.readPixels(940/2, 570/2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-		// console.log(pixels[0]);
-		if (pixels[0] == 0)
+		if (pixels[0] < map.setmap[map.level].length)
 		{
-			map.enemyhp--;
-			if (map.enemyhp < 0) obj[0][12] = 0;
-			document.getElementById("enemyhp").innerHTML = " EnemyHP: " + map.enemyhp;
+			// console.log(pixels[0]);
+			map.objId = pixels[0];
+
+			if (pixels[0] == 0)
+			{
+				death2Sound.play();
+				map.enemyhp -= 20;
+				if (map.enemyhp <= 0)
+				{
+					deathSound.play();
+					obj[0][12] = 0;
+				}
+				document.getElementById("enemyhp").innerHTML = " EnemyHP: " + map.enemyhp;
+			}
+			shotLook = true;
 		}
 		return pixels[0];
 	}
 
-	initDraw(gl, buffers)
-	{
+	// initDraw(gl, buffers)
+	// {
 		// gl.enable(gl.DEPTH_TEST);// Включает буфер глубины
 		//----------------------------------------------------------------------
 		//   О С В Е Щ Е Н И Е   ///////////////////////////////////////////////
@@ -66,13 +77,13 @@ class Draw
 		//----------------------------------------------------------------------
 		// gl.useProgram(shader.shaderProgram);// Включает шейдерную программу
 		//----------------------------------------------------------------------
-	}
+	// }
 
-	updateCam(_camera)
-	{
-		// gl.uniformMatrix4fv(shader.projectionMatrix22, false, _camera);// камера
-		// gl.uniformMatrix4fv(shader.projectionMatrix2, false, _camera);// камера
-	}
+	// updateCam(_camera)
+	// {
+	// 	// gl.uniformMatrix4fv(shader.projectionMatrix22, false, _camera);// камера
+	// 	// gl.uniformMatrix4fv(shader.projectionMatrix2, false, _camera);// камера
+	// }
 
 	drawScene(gl, texture, obj, id, buffers)
 	{
@@ -281,6 +292,7 @@ class Draw
 			break;
 		}
 		//----------------------------------------------------------------------
+		scene.getColor();
 	}
 	//--------------------------------------------------------------------------
 }
