@@ -29,6 +29,8 @@ let cameraMatrix = camera.getCamera();
 //------------------------------------------------------------------------------
 let scene = new Draw();
 //------------------------------------------------------------------------------
+let chud = new cHud();
+//------------------------------------------------------------------------------
 let coll = new Collision2d();
 //------------------------------------------------------------------------------
 //   П Е Р Е М Е Н Н Ы Е   /////////////////////////////////////////////////////
@@ -39,6 +41,8 @@ let objModeText = "";
 //------------------------------------------------------------------------------
 let shotOpen = false;
 let shotLook = false;
+//------------------------------------------------------------------------------
+let openmap = false;
 //------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
@@ -196,13 +200,15 @@ document.addEventListener("mousemove", (event)=> {
 
 document.addEventListener("mousedown", (event)=> {
 	// if (event.which == 1 && !mouseLeftLock)
-	if (event.which == 1)
+	if (event.which == 1 && map.weapon)
 	{
 		if (shotRL) {shot2_left_Sound.play(); shot2_left(); shotRL =! shotRL;}
 		else {shot2_right_Sound.play(); shot2_right(); shotRL =! shotRL;}
 		gColor = 1;
 		// shot2Sound.play();
 		mouseLeftLock = true;
+		map.weapon--;
+		chud.setweapon(map.weapon);
 		// setTimeout(() => {  mLeftLock(); }, 600);
 	}
 });
@@ -297,10 +303,53 @@ document.addEventListener("keydown", (event) => {
 	}
 
 	// if (event.keyCode == 17) gColor = 1;// Ctrl
-	if (event.keyCode == 67) creative = !creative;// [C]
-	if (event.keyCode == 71) ghost = !ghost;// [G]
-	// console.log(event.keyCode);
+	if (event.keyCode == 67)// [C]
+	{
+		creative = !creative;
+		if (creative) chud.sethudavatar("/game/hud/creative.jpg");
+		else chud.sethudavatar("/game/hud/avatar.jpg");
+	}
+	if (event.keyCode == 71)// [G]
+	{
+		ghost = !ghost;
+		if (ghost) chud.sethudavatar("/game/hud/ghost.jpg");
+		else chud.sethudavatar("/game/hud/avatar.jpg");
+	}
+	//--------------------------------------------------------------------------
+	if (event.keyCode == 82)// [R]
+	{
+		if (map.weaponall >= 14)
+		{
+			map.weaponall -= 14-map.weapon;
+			chud.setweaponall(map.weaponall);
+			chud.setweapon(map.weapon = 14);
+		}
+		else
+		{
+			if (map.weapon+map.weaponall > 14)
+			{
+				weaponall -= 14-map.weapon+map.weaponall
+				chud.setweaponall(map.weaponall=map.weaponall+map.weapon-14);
+				chud.setweapon(map.weapon=14);
+			}
+			else
+			{
+				map.weapon = map.weapon+map.weaponall;
+				chud.setweaponall(map.weaponall=0);
+				chud.setweapon(map.weapon);
+			}
+		}
+	}
+	//--------------------------------------------------------------------------
+	if (event.keyCode == 77)// [M]
+	{
+		openmap = !openmap;
+		if (openmap) document.getElementById("big-map").style.display = "block";
+		else document.getElementById("big-map").style.display = "none";
+	}
+
 	shot3_left();
+	// console.log(event.keyCode);
 });
 // ---------------------------------------------------------------
 document.addEventListener("keyup", (event) => {
@@ -379,6 +428,8 @@ function updateGame()
 	pawn.x = pawn.x + dx;
 	pawn.y = pawn.y + dy;
 	pawn.z = pawn.z + dz;
+	chud.setmapcor(pawn.x, pawn.z);
+	if (openmap) chud.setbigmappickup(pawn.x, pawn.z);
 	//--------------------------------------------------------------------------
 	drx = MouseY/6;
 	dry = -MouseX/6;
@@ -415,6 +466,23 @@ function updateGame()
 //------------------------------------------------------------------------------
 function playerSpawn()
 {
+	//--------------------------------------------------------------------------
+	// chud.sethp(map.health = 100);
+	// chud.setarmor(map.armor = 56);
+	// chud.sethudavatar("/game/hud/weapon.png");
+
+	// chud.setenemy(map.enemyhp = 42);
+	// chud.setenemyavatar("/game/hud/weapon.png");
+	// chud.setenemyname("По русски");
+
+	// chud.setkey(1);
+	// chud.setlevel(map.level = 33);
+	// chud.setcrystal(map.crystal = 42);
+
+	// chud.setlives(map.lives = 4);
+	// chud.setlivesimg("/game/img/img13.jpg");
+	// chud.setmapcor(-500, -500);
+	//--------------------------------------------------------------------------
 	// respawnSound.play();
 	pawn.x = map.spawnx;
 	pawn.y = map.spawny;
@@ -440,7 +508,10 @@ document.addEventListener("keydown", (event) => {
 	if (event.keyCode == 34) obj[map.objId][1+objMode*3] -= 2.1;// pageDown
 	if (event.keyCode == 33) obj[map.objId][1+objMode*3] += 2.1;// PageUp
 	//-----------------------------------------------------------------
-	// if (event.keyCode == 48) objId = 0;// 0
+	if (event.keyCode == 48)// 0
+	{
+		chud.sethp(32);
+	}
 	// if (event.keyCode == 49) objId = 1;// 1
 	// if (event.keyCode == 50) objId = 2;// 2
 	// if (event.keyCode == 51) objId = 3;// 3

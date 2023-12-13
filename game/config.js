@@ -32,6 +32,7 @@ document.write('\
 	<script src="/data/engine/core/cDraw.js"></script>\
 	<script src="/data/engine/core/cLoadtexture.js"></script>\
 	<script src="/data/engine/core/cFps.js"></script>\
+	<script src="/data/engine/core/cHud.js"></script>\
 	<script src="/data/engine/physics/cCollision2d.js"></script>\
 	<script src="/data/engine/main.js" defer></script>\
 ');
@@ -43,12 +44,6 @@ document.write('\
 	<div id="cam">0</div>\
 	<div id="pawn">0</div><br>\
 	<div id="debug">0</div><br>\
-	\
-	<div id="level"> Level: 0</div>\
-	<div id="key"> Key: 0</div>\
-	<div id="crystal"> Crystal: 0</div>\
-	<div id="health"> Health: 100</div>\
-	<div id="enemyhp"> EnemyHP: 100</div>\
 ');
 //------------------------------------------------------------------------------
 class Map// true false
@@ -80,21 +75,26 @@ class Map// true false
 	// Карта
 	imgpath = "game";// Папка с изображениями
 	typeimg = ".jpg";// Формат изображений
-	countimg = 17;// Количество изображений
+	countimg = 19;// Количество изображений
 	//--------------------------------------------------------------------------
 	// Интерфейс игры
 	level = 0;
 	key = 0;
 	crystal = 0;
+	lives = 3;
 	health = 100;
+	armor = 100;
 	enemyhp = 100;
+
+	weaponall = 50;
+	weapon = 14;
 	//--------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------
 	setmap =
 	[
 		[// 0
-			// [x,y,z,rx,ry,rz,sx,sy,sz,idImg,objType,Type(11),count(12)]
+			// [x,y,z,rx,ry,rz,sx,sy,sz,   idImg,idModel,Type(11),count(12)]
 			[-200,50,500,   0,0,180,   70,70,1,   16,0,10,100],// Приведение
 
 			[0,90,1000,   0,180,0,   2000,200,1,   0,0,0,1],// 0
@@ -131,11 +131,13 @@ class Map// true false
 			[500,50,500,   0,0,180,   50,50,1,   11,0,7,1],// дверь
 			[300,50,500,   0,0,180,   50,50,1,   12,0,8,1],// ключ
 
-			[200,50,500,   0,0,180,   50,50,1,   13,0,9,10],// Кристал
+			[200,50,500,   0,0,180,   50,50,1,   13,0,9,90],// Кристал
 			[100,50,500,   0,0,180,   50,50,1,   14,0,9,20],// Кристал
 			[0,50,500,   0,0,180,   50,50,1,   15,0,9,30],// Кристал
 
 			[-400,50,500,   0,0,180,   70,70,1,   17,0,11,50],// Аптечка
+			[-400,50,200,   0,0,180,   70,70,1,   18,0,12,50],// Бронежелет
+			[-400,50,0,   0,0,180,   70,70,1,   19,0,13,50],// Патроны
 		],
 		[//1
 			// [x,y,z,rx,ry,rz,sx,sy,sz,idImg,objType,Type(11),count(12)]
@@ -151,11 +153,13 @@ class Map// true false
 			[500,50,500,   0,0,180,   50,50,1,   11,0,7,1],// дверь
 			[300,50,500,   0,0,180,   50,50,1,   12,0,8,1],// ключ
 
-			[200,50,500,   0,0,180,   50,50,1,   13,0,9,10],// Кристал
+			[200,50,500,   0,0,180,   50,50,1,   13,0,9,90],// Кристал
 			[100,50,500,   0,0,180,   50,50,1,   14,0,9,20],// Кристал
 			[0,50,500,   0,0,180,   50,50,1,   15,0,9,30],// Кристал
 
 			[-400,50,500,   0,0,180,   70,70,1,   17,0,11,50],// Аптечка
+			[-400,50,200,   0,0,180,   70,70,1,   18,0,12,50],// Бронежелет
+			[-400,50,0,   0,0,180,   70,70,1,   19,0,13,50],// Патроны
 		],
 		[// 2
 			// [x,y,z,rx,ry,rz,sx,sy,sz,idImg,objType,Type(11),count(12)]
@@ -168,11 +172,13 @@ class Map// true false
 
 			[0,0,0,   90,0,0,   2000,2000,1,   7,0,0,1],// 4 земля
 
-			[200,50,500,   0,0,180,   50,50,1,   13,0,9,10],// Кристал
+			[200,50,500,   0,0,180,   50,50,1,   13,0,9,90],// Кристал
 			[100,50,500,   0,0,180,   50,50,1,   14,0,9,20],// Кристал
 			[0,50,500,   0,0,180,   50,50,1,   15,0,9,30],// Кристал
 
 			[-400,50,500,   0,0,180,   70,70,1,   17,0,11,50],// Аптечка
+			[-400,50,200,   0,0,180,   70,70,1,   18,0,12,50],// Бронежелет
+			[-400,50,0,   0,0,180,   70,70,1,   19,0,13,50],// Патроны
 		],
 	];
 	//--------------------------------------------------------------------------
@@ -195,6 +201,7 @@ class Map// true false
 		if (obj[id][11] == 9)// Кристал
 		{
 			map.setCrystal(obj[id][12]);
+			chud.setlivesimg("/game/img/img"+obj[id][9]+".jpg");
 			obj[id][12] = 0;
 		}
 		//----------------------------------------------------------------------
@@ -205,8 +212,33 @@ class Map// true false
 		//----------------------------------------------------------------------
 		if (obj[id][11] == 11)// Аптечка
 		{
-			map.setHealth(obj[id][12]);
-			obj[id][12] = 0;
+			// map.setHealth(obj[id][12]);
+			if (map.health < 100)
+			{
+				map.health = 100;
+				chud.sethp(map.health);
+				obj[id][12] = 0;
+			}
+		}
+		//----------------------------------------------------------------------
+		if (obj[id][11] == 12)// Бронежелет
+		{
+			if (map.armor < 100)
+			{
+				map.armor = 100;
+				chud.setarmor(map.armor);
+				obj[id][12] = 0;
+			}
+		}
+		//----------------------------------------------------------------------
+		if (obj[id][11] == 13)// Патроны
+		{
+			if (map.weaponall < 100)
+			{
+				map.weaponall += obj[id][12];
+				chud.setweaponall(map.weaponall);
+				obj[id][12] = 0;
+			}
 		}
 		//----------------------------------------------------------------------
 		// console.log(` >> My Crystal: [ ${map.crystal} ]`);
@@ -214,37 +246,55 @@ class Map// true false
 	//--------------------------------------------------------------------------
 	setHealth(count)
 	{
-		// wounded.play();
-		map.health += count;
-		// console.log(` >> My Health: [ ${map.health} ]`);
-		document.getElementById("health").innerHTML = " Health: " + map.health;
-		if (map.health < 0)
+		if (map.armor > 0)
+		{
+			map.armor += count;
+			if (map.armor < 0) map.armor = 0;
+			chud.setarmor(map.armor);
+		}
+		else
+		{
+			map.health += count;
+			if (map.health < 0) map.health = 0;
+			chud.sethp(map.health);
+		}
+		
+		if (map.health <= 0)
 		{
 			// deathSound.play();
-			alert(" >>   G A M E   O V E R !   ( Нажмите [F5] )   <<< ");
-			// console.log(` >>   G A M E   O V E R !`);
-			// setTimeout(() => {  loadMap(0); }, 500);
+
+			if (map.lives > 0)
+			{
+				map.lives--;
+				chud.setlives(map.lives);
+				chud.sethp(map.health = 100);
+				playerSpawn();}
+			else alert(" >>   G A M E   O V E R !   ( Нажмите [F5] )   <<< ");
 		}
 	}
 	//--------------------------------------------------------------------------
 	setCrystal(count)
 	{
-		// bring.play();
 		map.crystal += count;
-		// console.log(` >> My Health: [ ${map.health} ]`);
-		document.getElementById("crystal").innerHTML = " Crystal: " + map.crystal;
-		// if (map.health < 0)
-		// {
-		// 	alert(" >>   G A M E   O V E R !   ( Нажмите [F5] )   <<< ");
-		// 	// console.log(` >>   G A M E   O V E R !`);
-		// 	// setTimeout(() => {  loadMap(0); }, 500);
-		// }
+		chud.setcrystal(map.crystal);
+		if (map.crystal >= 100)
+		{
+			if (map.lives < 6)
+			{
+				map.lives++;
+				chud.setlives(map.lives);
+				map.crystal -= 100;
+				chud.setcrystal(map.crystal);
+			}
+			else {map.crystal = 100;chud.setcrystal(map.crystal);}
+		}
+		
 	}
 	//--------------------------------------------------------------------------
 	setKey(count)
 	{
 		map.key += count;
-		document.getElementById("key").innerHTML = " Key: " + map.key;
+		chud.setkey(map.key);
 	}
 	//--------------------------------------------------------------------------
 	nextLevel(id)
@@ -252,9 +302,10 @@ class Map// true false
 		if (map.key)
 		{
 			map.key--;
+			chud.setkey(map.key);
 			map.level++;
 			obj[id][12] = 0;
-			document.getElementById("level").innerHTML = " Level: " + map.level;
+			chud.setlevel(map.level+1);
 			setTimeout(() => {  loadMap(map.level); }, 500);
 		}
 		else console.log(` >> Give Key!!!`);

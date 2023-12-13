@@ -19,33 +19,61 @@
 				<div id="two_pistols_right"></div>
 
 				<div class="hud">
-					<div class="hud-hp"></div>
-					<div class="hud-armor"></div>
-					<div class="hud-weapon"></div>
-					<div class="hud-weapon-count">30/999</div>
+					<div class="hud-hp">
+						<div id="hud-hp-progress"></div>
+						<div id="hud-hp-count">100</div>
+					</div>
+
+					<div class="hud-armor">
+						<div id="hud-armor-progress"></div>
+						<div id="hud-armor-count">100</div>
+					</div>
+					
+					<div class="hud-weapon">
+						<div id="hud-weapon-progress"></div>
+					</div>
+					<div class="hud-weapon-count"><span id="weapon-count">14</span>/<span id="weapon-countall">50</span></div>
+					<div id="hud-avatar"></div>
 				</div>
 
 				<div class="enemy">
-					<div class="enemy-hp"></div>
-					<div class="enemy-name">Уставший призрак</div>
+					<div class="enemy-hp">
+						<div id="enemy-hp-progress"></div>
+						<div id="enemy-hp-count">100</div>
+					</div>
+					<div id="enemy-name">Уставший призрак</div>
+					<div id="enemy-avatar"></div>
 				</div>
 
-				<div class="map"></div>
+				<div id="map"></div>
 
-				<div class="lives">
-					<div class="lives-count"></div>
-					<div class="lives-key"></div>
+				<div class="crystal">
+					<div class="hud-crystal">
+						<div id="hud-crystal-progress"></div>
+						<div id="hud-crystal-count">0</div>
+					</div>
+					<div id="lives-img"></div>
+					<div id="hud-lives"></div>
+					<div id="hud-key"></div>
 				</div>
 
-				<div class="level">Уровень: 99</div>
+				<div class="level">Уровень: <span id="level-count">1</span></div>
 
+				<div id="big-map">
+					<div id="big-map-pickup"></div>
+				</div>
 			</div>
 		</div>
+		<button></button>
 		<!-- --------------------------------------------------------------- -->
 		<!-- Игра -->
 		<!-- <script src="/test/config.js"></script> -->
 		<script src="/game/config.js"></script>
 		<!-- <script src="/generation/config.js"></script> -->
+		<!-- --------------------------------------------------------------- -->
+		<!-- <script>
+			console.log(document.getElementById("map").style);
+		</script> -->
 		<!-- --------------------------------------------------------------- -->
 	</body>
 </html>

@@ -178,20 +178,20 @@ body {
 	background-color: #700;
 	font-size: 13px;
 	font-weight: 600;
+	height: 12px;
 	position: relative;
 }
 
-.hud-hp::before {
-	content: "";
-	display: block;
-	width: 140px;
+#hud-hp-progress {
+	position: absolute;
+	width: 200px;
 	height: 12px;
 	background-color: #b00;
 }
 
-.hud-hp::after {
+#hud-hp-count {
 	position: absolute;
-	content: "72";
+	display: inline;
 	top: -1px;
 }
 /* -------------------------------------------------------------------------- */
@@ -204,20 +204,20 @@ body {
 	font-size: 13px;
 	font-weight: 600;
 	margin-top: 3px;
+	height: 12px;
 	position: relative;
 }
 
-.hud-armor::before {
-	content: "";
-	display: block;
-	width: 80px;
+#hud-armor-progress {
+	position: absolute;
+	width: 200px;
 	height: 12px;
 	background-color: #bbb;
 }
 
-.hud-armor::after {
+#hud-armor-count {
 	position: absolute;
-	content: "46";
+	display: inline;
 	top: -1px;
 }
 /* -------------------------------------------------------------------------- */
@@ -231,24 +231,20 @@ body {
 	background-size: 130px;
 }
 
-.hud-weapon::before {
+#hud-avatar {
 	position: absolute;
-	content: "";
 	border: 2px solid #333;
 	border-radius: 42px;
-	display: block;
 	width: 80px;
 	height: 80px;
-	top: -52px;
+	top: -7px;
 	left: -90px;
 	background-image: url("/game/hud/avatar.jpg");
 	background-size: 80px;
 }
 
-.hud-weapon::after {
+#hud-weapon-progress {
 	position: absolute;
-	content: "";
-	display: block;
 	width: 60px;
 	height: 280px;
 	top: 0;
@@ -275,20 +271,18 @@ body {
 	left: 18px;
 }
 
-.enemy::after {
+#enemy-avatar {
 	position: absolute;
-	content: "";
 	border: 2px solid #333;
 	border-radius: 42px;
-	display: block;
 	width: 80px;
 	height: 80px;
 	top: -6px;
 	left: 250px;
-	background-image: url("/game/hud/img16.jpg");
+	background-image: url("/game/img/img16.jpg");
 	background-size: 80px;
 }
-
+/*  */
 .enemy-hp {
 	left: 315px;
 	border: 2px solid #333;
@@ -298,24 +292,24 @@ body {
 	background-color: #070;
 	font-size: 13px;
 	font-weight: 600;
+	height: 12px;
 	position: relative;
 }
 
-.enemy-hp::before {
-	content: "";
-	display: block;
-	width: 80px;
+#enemy-hp-progress {
+	position: absolute;
+	width: 300px;
 	height: 12px;
 	background-color: #0b0;
 }
 
-.enemy-hp::after {
+#enemy-hp-count {
 	position: absolute;
-	content: "38";
+	display: inline;
 	top: -1px;
 }
-
-.enemy-name {
+/*  */
+#enemy-name {
 	position: absolute;
 	top: 19px;
 	left: 327px;
@@ -328,7 +322,28 @@ body {
 	font-size: 16px;
 }
 /* -------------------------------------------------------------------------- */
-.map {
+#big-map {
+	display: none;
+	position: absolute;
+	top: 75px;
+	left: 100px;
+	border: 1px solid #000;
+	width: 750px;
+	height: 450px;
+	background-image: url("/game/hud/map.jpg");
+	background-position: -400px -240px;
+}
+
+#big-map-pickup {
+	position: absolute;
+	left: 472px;
+	top: 277px;
+	width: 16px;
+	height: 16px;
+	background-image: url("/cursor.png");
+}
+/* -------------------------------------------------------------------------- */
+#map {
 	position: absolute;
 	top: 75px;
 	left: 15px;
@@ -340,7 +355,7 @@ body {
 	background-position: -400px -240px;
 }
 
-.map::before {
+#map::before {
 	position: absolute;
 	content: "";
 	display: block;
@@ -348,11 +363,11 @@ body {
 	height: 180px;
 	left: -14px;
 	top: -14px;
-	background-image: url("/game/hud/frame-map.png");
+	background-image: url("/game/hud/frame-map2.png");
 	background-size: 180px;
 }
 
-.map::after {
+#map::after {
 	position: absolute;
 	content: "";
 	display: block;
@@ -363,13 +378,13 @@ body {
 	background-image: url("/game/hud/arrow.png");
 }
 /* -------------------------------------------------------------------------- */
-.lives {
+.crystal {
 	position: absolute;
 	top: 9px;
 	left: 55px;
 }
 /* -------------------------------------------------------------------------- */
-.lives-count {
+.hud-crystal {
 	border: 2px solid #333;
 	width: 200px;
 	text-align: center;
@@ -377,53 +392,51 @@ body {
 	background-color: #707;
 	font-size: 13px;
 	font-weight: 600;
+	height: 12px;
 	position: relative;
 }
 
-.lives-count::before {
-	content: "";
-	display: block;
-	width: 140px;
+#hud-crystal-progress {
+	position: absolute;
+	width: 0px;
 	height: 12px;
 	background-color: #b0b;
 }
 
-.lives-count::after {
+#hud-crystal-count {
 	position: absolute;
-	content: "72";
+	display: inline;
 	top: -1px;
 }
 /* -------------------------------------------------------------------------- */
-.lives-key {
+#lives-img {
 	position: absolute;
-	left: -50px;
-	top: -3px;
+	border: 2px solid #333;
+	border-radius: 42px;
 	width: 70px;
 	height: 70px;
+	left: -50px;
+	top: -3px;
 	background-image: url("/game/hud/crystal.png");
 	background-size: 70px;
 }
 
-.lives-key::before {
+#hud-lives {
 	position: absolute;
-	content: "";
-	display: block;
-	width: 180px;
+	width: 90px;
 	height: 30px;
-	top: 17px;
-	left: 72px;
+	top: 15px;
+	left: 24px;
 	background-image: url("/game/hud/heart.png");
 	background-size: 30px;
 }
 
-.lives-key::after {
+#hud-key {
 	position: absolute;
-	content: "";
-	display: block;
 	width: 150px;
-	height: 64px;
+	height: 0px;
 	top: 275px;
-	right: -60px;
+	left: -60px;
 	background-image: url("/game/hud/key.png");
 	background-size: 150px;
 	transform: rotate(-50deg);

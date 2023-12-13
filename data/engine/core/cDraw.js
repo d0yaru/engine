@@ -24,10 +24,11 @@ class Draw
 				map.enemyhp -= 20;
 				if (map.enemyhp <= 0)
 				{
+					if (map.enemyhp < 0) map.enemyhp = 0;
 					deathSound.play();
 					obj[0][12] = 0;
 				}
-				document.getElementById("enemyhp").innerHTML = " EnemyHP: " + map.enemyhp;
+				chud.setenemy(map.enemyhp);
 			}
 			shotLook = true;
 		}
