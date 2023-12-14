@@ -240,7 +240,7 @@ body {
 	top: -7px;
 	left: -90px;
 	background-image: url("/game/hud/avatar.jpg");
-	background-size: 80px;
+	background-size: cover;
 }
 
 #hud-weapon-progress {
@@ -280,7 +280,7 @@ body {
 	top: -6px;
 	left: 250px;
 	background-image: url("/game/img/img16.jpg");
-	background-size: 80px;
+	background-size: cover;
 }
 /*  */
 .enemy-hp {
@@ -427,7 +427,7 @@ body {
 	height: 30px;
 	top: 15px;
 	left: 24px;
-	background-image: url("/game/hud/heart.png");
+	background-image: url("/game/hud/heart2.png");
 	background-size: 30px;
 }
 

@@ -15,7 +15,6 @@ let objs = new Objs();
 let ltexture = new LoadTexture();
 //------------------------------------------------------------------------------
 let map = new Map();
-let obj = map.test;
 //------------------------------------------------------------------------------
 // alert(`Привет, ${this.name}!`);
 //------------------------------------------------------------------------------
@@ -106,7 +105,7 @@ function main()
 	const buffers = objs.initBuffers(gl);// Загружаем буферы
 	shader = shader.initShader();
 	//--------------------------------------------------------------------------
-	loadMap(map.level);
+	playerSpawn();
 	//--------------------------------------------------------------------------
 	let texture = [];
 	// xTexture 3
@@ -130,12 +129,12 @@ function main()
 		scene.clearScene(gl,map.sr,map.sg,map.sb);
 		addScene(gl, texture, buffers);
 		//----------------------------------------------------------------------
-		document.getElementById("objData").innerHTML = 
-		" objId: " + map.objId +
-		" X:"+obj[map.objId][0].toFixed(2)+" Y:"+obj[map.objId][1].toFixed(2)+" Z:"+obj[map.objId][2].toFixed(2)+
-		" rX:"+obj[map.objId][3].toFixed(2)+" rY:"+obj[map.objId][4].toFixed(2)+" rZ:"+obj[map.objId][5].toFixed(2)+
-		" sX:"+obj[map.objId][6].toFixed(2)+" sY:"+obj[map.objId][7].toFixed(2)+" sZ:"+obj[map.objId][8].toFixed(2)+
-		" objCount: " + objCount + " objMode: " + objMode + objModeText;
+		// document.getElementById("objData").innerHTML = 
+		// " objId: " + map.objId +
+		// " X:"+map.setmap[map.level][map.objId][0].toFixed(2)+" Y:"+map.setmap[map.level][map.objId][1].toFixed(2)+" Z:"+map.setmap[map.level][map.objId][2].toFixed(2)+
+		// " rX:"+map.setmap[map.level][map.objId][3].toFixed(2)+" rY:"+map.setmap[map.level][map.objId][4].toFixed(2)+" rZ:"+map.setmap[map.level][map.objId][5].toFixed(2)+
+		// " sX:"+map.setmap[map.level][map.objId][6].toFixed(2)+" sY:"+map.setmap[map.level][map.objId][7].toFixed(2)+" sZ:"+map.setmap[map.level][map.objId][8].toFixed(2)+
+		// " objCount: " + objCount + " objMode: " + objMode + objModeText;
 		//----------------------------------------------------------------------
 	}
 	//--------------------------------------------------------------------------
@@ -148,15 +147,16 @@ setTimeout(() => {  main(); }, 500);
 //------------------------------------------------------------------------------
 function addScene(gl, texture, buffers)
 {
-	for (let id = 0; id < obj.length; id++) {// рисует все объекты на карте
-		if (obj[id][12])
+	for (let id = 0; id < map.setmap[map.level].length; id++)// рисует все объекты на карте
+	{// рисует все объекты на карте
+		if (map.setmap[map.level][id][12])
 		{
-			if (obj[id][11]) obj[id][4] = pawn.ry;
+			if (map.setmap[map.level][id][11]) map.setmap[map.level][id][4] = pawn.ry;
 
-			if (gColor && !shotLook) scene.drawScene2(gl, texture, obj, id, buffers);
-			else scene.drawScene(gl, texture, obj, id, buffers);
+			if (gColor && !shotLook) scene.drawScene2(gl, texture, id, buffers);
+			else scene.drawScene(gl, texture, id, buffers);
 
-			// scene.drawScene(gl, texture, obj, id, buffers);
+			// scene.drawScene2(gl, texture, id, buffers);
 
 			objCount++;
 		}
@@ -186,27 +186,18 @@ container.onclick = function() {
 let MouseX = 0;
 let MouseY = 0;
 //----------------------------------------------------------------
-// let mouseLeftLock = false;
-
-// function mLeftLock()
-// {
-// 	mouseLeftLock = false;
-// }
-
 document.addEventListener("mousemove", (event)=> {
 	MouseX = event.movementX;
 	MouseY = event.movementY;
 });
 
 document.addEventListener("mousedown", (event)=> {
-	// if (event.which == 1 && !mouseLeftLock)
 	if (event.which == 1 && map.weapon)
 	{
 		if (shotRL) {shot2_left_Sound.play(); shot2_left(); shotRL =! shotRL;}
 		else {shot2_right_Sound.play(); shot2_right(); shotRL =! shotRL;}
 		gColor = 1;
 		// shot2Sound.play();
-		mouseLeftLock = true;
 		map.weapon--;
 		chud.setweapon(map.weapon);
 		// setTimeout(() => {  mLeftLock(); }, 600);
@@ -307,13 +298,13 @@ document.addEventListener("keydown", (event) => {
 	{
 		creative = !creative;
 		if (creative) chud.sethudavatar("/game/hud/creative.jpg");
-		else chud.sethudavatar("/game/hud/avatar.jpg");
+		else chud.sethudavatar(map.avatar);
 	}
 	if (event.keyCode == 71)// [G]
 	{
 		ghost = !ghost;
 		if (ghost) chud.sethudavatar("/game/hud/ghost.jpg");
-		else chud.sethudavatar("/game/hud/avatar.jpg");
+		else chud.sethudavatar(map.avatar);
 	}
 	//--------------------------------------------------------------------------
 	if (event.keyCode == 82)// [R]
@@ -375,7 +366,12 @@ let onGround = false;
 
 let dx = dy = dz = 0;
 let edx = edy = edz = 0;// враг
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
+function distance(x1, z1, x2, z2)
+{
+	return Math.sqrt(((x2-x1)**2)+((z2-z1)**2));
+}
+// -----------------------------------------------------------------------------
 function updateGame()
 {
 	//--------------------------------------------------------------------------
@@ -383,25 +379,42 @@ function updateGame()
 	dx = ((PressRight - PressLeft)*Math.cos(pawn.ry*deg) - (PressBack - PressForward)*Math.sin(pawn.ry*deg))*pawn.vx;
 	dz = (-(PressBack - PressForward)*Math.cos(pawn.ry*deg) - (PressRight - PressLeft)*Math.sin(pawn.ry*deg))*pawn.vz;
 	//--------------------------------------------------------------------------
-	// enemy.rx = obj[0][3];
-	enemy.ry = obj[0][4]+180;
-
-	edx = ((0 - 0)*Math.cos(enemy.ry*deg) - (0 - 1)*Math.sin(enemy.ry*deg))*enemy.vx;
-	edz = (-(0 - 1)*Math.cos(enemy.ry*deg) - (0 - 0)*Math.sin(enemy.ry*deg))*enemy.vz;
-	
-	enemy.x = enemy.x + edx;
-	// enemy.y = enemy.y + edy;
-	enemy.z = enemy.z + edz;
-
-	document.getElementById("debug").innerHTML = " X:["+enemy.x.toFixed(2)+"] z:["+enemy.z.toFixed(2)+"]";
-	// чтобы не убегал далеко
-	if (enemy.x < -1500) enemy.x = -1500;
-	if (enemy.x > 1500) enemy.x = 1500;
-	if (enemy.z < -1500) enemy.z = -1500;
-	if (enemy.z > 1500) enemy.z = 1500;
-
-	obj[0][0] = enemy.x;
-	obj[0][2] = enemy.z;
+	// движение врагов
+	for (let id = 0; id < map.setmap[map.level].length; id++)
+	{
+		if (map.setmap[map.level][id][11] == 10)
+		{
+			//------------------------------------------------------------------
+			// растояние между двумя точками
+			// let test = 6**2;//число в квадрате
+			// let test = Math.sqrt(36);// квадратный корень
+			let dist = distance(map.setmap[map.level][id][0], map.setmap[map.level][id][2], pawn.x, pawn.z);
+			// console.log(dist);
+			//------------------------------------------------------------------
+			if (dist < 700)
+			{
+				//------------------------------------------------------------------
+				// направление движения
+				map.setmap[map.level][id][4] = map.setmap[map.level][id][4]+180;
+				//------------------------------------------------------------------
+				edx = ((0 - 0)*Math.cos(map.setmap[map.level][id][4]*deg) - (0 - 1)*Math.sin(map.setmap[map.level][id][4]*deg))*20;//enemy.vx;
+				edz = (-(0 - 1)*Math.cos(map.setmap[map.level][id][4]*deg) - (0 - 0)*Math.sin(map.setmap[map.level][id][4]*deg))*20;//enemy.vz;
+				
+				map.setmap[map.level][id][0] = map.setmap[map.level][id][0] + edx;
+				// enemy.y = enemy.y + edy;
+				map.setmap[map.level][id][2] = map.setmap[map.level][id][2] + edz;
+			}
+			//------------------------------------------------------------------
+			// чтобы не убегал далеко
+			if (map.setmap[map.level][id][0] < -1500) map.setmap[map.level][id][0] = -1500;
+			if (map.setmap[map.level][id][0] > 1500) map.setmap[map.level][id][0] = 1500;
+			if (map.setmap[map.level][id][2] < -1500) map.setmap[map.level][id][2] = -1500;
+			if (map.setmap[map.level][id][2] > 1500) map.setmap[map.level][id][2] = 1500;
+			//------------------------------------------------------------------
+			// document.getElementById("debug").innerHTML = " X:["+enemy.x.toFixed(2)+"] z:["+enemy.z.toFixed(2)+"]";
+			//------------------------------------------------------------------
+		}
+	}
 	//--------------------------------------------------------------------------
 	if (!creative)
 	{
@@ -471,7 +484,7 @@ function playerSpawn()
 	// chud.setarmor(map.armor = 56);
 	// chud.sethudavatar("/game/hud/weapon.png");
 
-	// chud.setenemy(map.enemyhp = 42);
+	chud.setenemy(map.setmap[map.level][0][12]);
 	// chud.setenemyavatar("/game/hud/weapon.png");
 	// chud.setenemyname("По русски");
 
@@ -483,6 +496,8 @@ function playerSpawn()
 	// chud.setlivesimg("/game/img/img13.jpg");
 	// chud.setmapcor(-500, -500);
 	//--------------------------------------------------------------------------
+	chud.sethudavatar(map.avatar);
+	//--------------------------------------------------------------------------
 	// respawnSound.play();
 	pawn.x = map.spawnx;
 	pawn.y = map.spawny;
@@ -490,23 +505,17 @@ function playerSpawn()
 	pawn.rx = map.spawnrx;
 	pawn.ry = map.spawnrx;
 }
-
-function loadMap(world)
-{
-	obj = map.setmap[world];
-	playerSpawn();
-}
 //---------------------------------------------------------------------
 //   К Л А В И А Т У Р А   ////////////////////////////////////////////
 //---------------------------------------------------------------------
 document.addEventListener("keydown", (event) => {
 	//-----------------------------------------------------------------
-	if (event.keyCode == 39) obj[map.objId][0+objMode*3] += 2.1;// ->
-	if (event.keyCode == 37) obj[map.objId][0+objMode*3] -= 2.1;// <-
-	if (event.keyCode == 38) obj[map.objId][2+objMode*3] += 2.1;// ^
-	if (event.keyCode == 40) obj[map.objId][2+objMode*3] -= 2.1;// v
-	if (event.keyCode == 34) obj[map.objId][1+objMode*3] -= 2.1;// pageDown
-	if (event.keyCode == 33) obj[map.objId][1+objMode*3] += 2.1;// PageUp
+	if (event.keyCode == 39) map.setmap[map.level][map.objId][0+objMode*3] += 2.1;// ->
+	if (event.keyCode == 37) map.setmap[map.level][map.objId][0+objMode*3] -= 2.1;// <-
+	if (event.keyCode == 38) map.setmap[map.level][map.objId][2+objMode*3] += 2.1;// ^
+	if (event.keyCode == 40) map.setmap[map.level][map.objId][2+objMode*3] -= 2.1;// v
+	if (event.keyCode == 34) map.setmap[map.level][map.objId][1+objMode*3] -= 2.1;// pageDown
+	if (event.keyCode == 33) map.setmap[map.level][map.objId][1+objMode*3] += 2.1;// PageUp
 	//-----------------------------------------------------------------
 	if (event.keyCode == 48)// 0
 	{
